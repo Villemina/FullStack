@@ -1,0 +1,68 @@
+<h1>Add Animal</h1>
+<form id="add-animal" action="/animals/add" method='post'>
+  <table>
+    <tr>
+      <td>
+        <label for="species">Species:</label>
+      </td>
+      <td>
+        <input required id="species" type="text" name="species">
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <label for="name">Name:</label>
+      </td>
+      <td>
+        <input required id="name" type="text" name="name">
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <label for="where">Where:</label>
+      </td>
+      <td>
+        <input required id="where" type="text" name="where">
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <label for="health-status">Health Status:</label>
+      </td>
+      <td>
+        <select required id="health-status" name="healthStatus">
+          <option value="EXCELLENT">Excellent</option>
+          <option value="GOOD">Good</option>
+          <option value="MINOR">Minor</option>
+          <option value="MAJOR_ISSUES">Major issues</option>
+          <option value="SEVERE_ISSUES">Severe issues</option>
+          <option value="DEGRADING">Degrading</option>
+          <option value="RECOVERING">Recovering</option>
+          <option value="TREATED">Treated</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <label for="origin">Origin:</label>
+      </td>
+      <td>
+        <input required id="origin" type="text" name="origin">
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <label for="comments">Comments:</label>
+      </td>
+      <td>
+        <textarea required id="comments"  name="comments"></textarea>
+      </td>
+    </tr>
+  </table>
+  <div>
+    <button type='submit'>Save the animal</button>
+  </div>
+  <p>
+    <a href="/animals">Back to the list</a>
+  </p>
+</form>
