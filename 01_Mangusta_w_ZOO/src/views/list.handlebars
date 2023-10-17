@@ -1,0 +1,50 @@
+{{#unless animals.length}}
+  <h1>No animals added yet</h1>
+{{/unless}}
+
+{{#if animals.length}}
+  <h1>Animals list:</h1>
+  <table border="1">
+    <thead>
+    <tr>
+      <td><b>Species</b></td>
+      <td><b>Name</b></td>
+      <td><b>Birth Date</b></td>
+      <td><b>Lives in</b></td>
+      <td><b>Health</b></td>
+      <td><b>Origin</b></td>
+      <td><b>Comments</b></td>
+    </tr>
+    </thead>
+    <tbody>
+    {{#each animals}}
+      <tr>
+        <td>{{species}}</td>
+        <td>{{name}}</td>
+        <td>{{birthDate}}</td>
+        <td>{{where}}</td>
+        <td>{{healthStatus}}</td>
+        <td>{{origin}}</td>
+        <td>{{comments}}</td>
+        <td><a href="/animals/remove?id={{_id}}">Remove></td>
+      </tr>
+    {{/each}}
+    </tbody>
+  </table>
+
+  {{#showPages pages}}
+    <p>
+      Pages:
+    <div>
+      {{#each pages}}
+        <a href="/animals?page={{this}}">{{hrPage this}}</a>
+      {{/each}}
+    </div>
+    </p>
+  {{/showPages}}
+{{/if}}
+
+<p>
+  <a href="/animals/add">Add new animal</a>
+</p>
+
