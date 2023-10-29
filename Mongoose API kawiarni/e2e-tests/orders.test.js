@@ -2,15 +2,8 @@ import MongoClient from 'mongodb';
 import axios from 'axios';
 
 import { connectToDB } from '../src/db';
-import { DB_NAME } from '../src/config/db';;
-import { APP_HOST, APP_PORT } from '../src/config/app'
-
-const { ObjectID } = MongoClient;import MongoClient from 'mongodb';
-import axios from 'axios';
-
-import { connectToMongoose } from '../src/models';
+import { DB_NAME } from '../src/config/db';
 import { APP_HOST, APP_PORT } from '../src/config/app';
-import { DB_NAME } from '../src/config/db';;
 
 const { ObjectID } = MongoClient;
 
