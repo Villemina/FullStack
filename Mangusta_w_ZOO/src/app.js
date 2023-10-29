@@ -5,9 +5,9 @@ import cors from 'cors';
 import morgan from 'morgan';
 import Handlebars from 'handlebars';
 
-import { APP_PORT } from './config/app';
-import { connectToMongoose } from './models';
-import api from './api';
+import { APP_PORT } from './config/app.js';
+import { connectToMongoose } from './models/index.js';
+import api from './api/index.js';
 
 (async function runApp() {
   try {

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-import { PAGE_SIZE } from '../constants/db';
+import { PAGE_SIZE } from '../constants/db.js';
 
 const animalSchema = new mongoose.Schema({
   species: {

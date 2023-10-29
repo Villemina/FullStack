@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-import { MISSING_DATA, NOT_FOUND, VALIDATION_ERROR } from '../constants/error';
+import { MISSING_DATA, NOT_FOUND, VALIDATION_ERROR } from '../constants/error.js';
 
 export default class Animals {
   async addAnimal(animalData) {
