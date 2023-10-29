@@ -1,6 +1,6 @@
 import express from 'express';
 
-import animals from './animals';
+import animals from './animals.js';
 
 const { Router } = express;
 
