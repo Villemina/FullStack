@@ -1,42 +1,11 @@
-import Joi from '@hapi/joi';
+import mongoose from 'mongoose';
 
-import { addOrder, deleteOrder, getOrders, updateOrder } from '../db/orders';
-import {
-  MISSING_DATA,
-  NOT_FOUND,
-  PEER_ERROR,
-  VALIDATION_ERROR,
-} from '../constants/error';
-import { idSchema } from '../constants/validation';
-import { getEmployees } from '../db/staff';
-import { getProducts } from '../db/products';
+import { addOrder, deleteOrder, getOrders, updateOrder } from '../models/orders';
+import { MISSING_DATA, NOT_FOUND, PEER_ERROR, VALIDATION_ERROR, } from '../constants/error';
+import { getEmployees } from '../models/staff';
+import { getProducts } from '../models/products';
 
 export default class Orders {
-  idSchema = idSchema;
-
-  productOrderSchema = Joi.object().keys({
-    productId: this.idSchema.required(),
-    name: Joi.string().required(),
-    amount: Joi.number().greater(0).required(),
-    unitPrice: Joi.number().greater(0).required(),
-  });
-
-  orderUpdateSchema = Joi.object().keys({
-    _id: this.idSchema.required(),
-    date: Joi.date(),
-    location: Joi.string(),
-    paidIn: Joi.string().valid('cash', 'card'),
-    staffId: Joi.string().length(24),
-    products: Joi.array().items(this.productOrderSchema).min(1),
-    total: Joi.number().greater(0),
-  });
-
-  orderSchema = this.orderUpdateSchema.options({ presence: 'required' });
-
-  addOrderSchema = this.orderSchema.keys({
-    _id: Joi.any().strip().optional(),
-  });
-
   static async _checkIfEmployeeExists(employeeId) {
     const existingEmployee = await getEmployees(employeeId);
     if (!existingEmployee) {
@@ -51,8 +20,8 @@ export default class Orders {
     const dbProducts = await getProducts(productIds);
     if (dbProducts.length !== productIds.length) {
       const missingIds = productIds.filter(
-        (productId) =>
-          dbProducts.findIndex((product) => product._id === productId) === -1
+          (productId) =>
+              dbProducts.findIndex((product) => product._id === productId) === -1
       );
       const error = new Error(PEER_ERROR);
       error.reason = `Missing following products: ${missingIds.join(', ')}`;
@@ -66,25 +35,27 @@ export default class Orders {
     }
 
     try {
-      await this.addOrderSchema.validateAsync(orderData);
+      await Orders._checkIfEmployeeExists(orderData.staffId);
+      await Orders._checkIfProductsExist(orderData.products);
+
+      return await addOrder(orderData);
     } catch (err) {
-      const error = new Error(VALIDATION_ERROR);
-      error.reason = err.message;
-      throw error;
+      if (err.name === 'ValidationError') {
+        const error = new Error(VALIDATION_ERROR);
+        error.reason = err.message;
+        throw error;
+      }
+
+      throw err;
     }
-
-    await Orders._checkIfEmployeeExists(orderData.staffId);
-    await Orders._checkIfProductsExist(orderData.products);
-
-    return addOrder(orderData);
   }
 
   async deleteOrder(orderId) {
-    try {
-      await this.idSchema.validateAsync(orderId);
-    } catch (err) {
+    const isValidObjectId = mongoose.Types.ObjectId.isValid(orderId);
+
+    if (!isValidObjectId) {
       const error = new Error(VALIDATION_ERROR);
-      error.reason = err.message;
+      error.reason = `Not a valid ID: ${orderId}`;
       throw error;
     }
 
@@ -106,20 +77,22 @@ export default class Orders {
     }
 
     try {
-      await this.orderUpdateSchema.validateAsync(orderData);
+      if (orderData.staffId) {
+        await Orders._checkIfEmployeeExists(orderData.staffId);
+      }
+      if (orderData.products) {
+        await Orders._checkIfProductsExist(orderData.products);
+      }
+
+      return await updateOrder(orderData);
     } catch (err) {
-      const error = new Error(VALIDATION_ERROR);
-      error.reason = err.message;
-      throw error;
-    }
+      if (err.name === 'ValidationError') {
+        const error = new Error(VALIDATION_ERROR);
+        error.reason = err.message;
+        throw error;
+      }
 
-    if (orderData.staffId) {
-      await Orders._checkIfEmployeeExists(orderData.staffId);
+      throw err;
     }
-    if (orderData.products) {
-      await Orders._checkIfProductsExist(orderData.products);
-    }
-
-    return updateOrder(orderData);
   }
 }
