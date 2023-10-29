@@ -1,62 +1,38 @@
-import Joi from '@hapi/joi';
+import mongoose from 'mongoose';
+
 import { MISSING_DATA, NOT_FOUND, VALIDATION_ERROR } from '../constants/error';
-import { idSchema } from '../constants/validation';
 import {
   addProduct,
   deleteProduct,
   getProducts,
   updateProduct,
-} from '../db/products';
+} from '../models/products';
 
 export default class Products {
-  idSchema = idSchema;
-
-  productUpdateSchema = Joi.object().keys({
-    _id: this.idSchema.required(),
-    name: Joi.string(),
-    brand: Joi.string(),
-    available: Joi.number(),
-    lastOrderDate: Joi.date().optional(),
-    unitPrice: Joi.number(),
-    supplierName: Joi.string(),
-    expirationDate: Joi.date(),
-    categories: Joi.array().items(
-      Joi.string().valid('coffee'),
-      Joi.string().valid('food'),
-      Joi.string().valid('accessories'),
-      Joi.string().valid('equipment'),
-      Joi.string().valid('premium')
-    ),
-  });
-
-  productSchema = this.productUpdateSchema.options({ presence: 'required' });
-
-  addProductSchema = this.productSchema.keys({
-    _id: Joi.any().strip().optional(),
-  });
-
   async addProduct(productData) {
     if (!productData) {
       throw new Error(MISSING_DATA);
     }
 
     try {
-      await this.addProductSchema.validateAsync(productData);
+      return await addProduct(productData);
     } catch (err) {
-      const error = new Error(VALIDATION_ERROR);
-      error.reason = err.message;
-      throw error;
-    }
+      if (err.name === 'ValidationError') {
+        const error = new Error(VALIDATION_ERROR);
+        error.reason = err.message;
+        throw error;
+      }
 
-    return addProduct(productData);
+      throw err;
+    }
   }
 
   async deleteProduct(productId) {
-    try {
-      await this.idSchema.validateAsync(productId);
-    } catch (err) {
+    const isValidObjectId = mongoose.Types.ObjectId.isValid(productId);
+
+    if (!isValidObjectId) {
       const error = new Error(VALIDATION_ERROR);
-      error.reason = err.message;
+      error.reason = `Not a valid ID: ${productId}`;
       throw error;
     }
 
@@ -73,19 +49,21 @@ export default class Products {
   }
 
   async updateProduct(productData) {
-    // Throw when there is nothing to update
+
     if (!productData || Object.keys(productData).length <= 1) {
       throw new Error(MISSING_DATA);
     }
 
     try {
-      await this.productUpdateSchema.validateAsync(productData);
+      return await updateProduct(productData);
     } catch (err) {
-      const error = new Error(VALIDATION_ERROR);
-      error.reason = err.message;
-      throw error;
-    }
+      if (err.name === 'ValidationError') {
+        const error = new Error(VALIDATION_ERROR);
+        error.reason = err.message;
+        throw error;
+      }
 
-    return updateProduct(productData);
+      throw err;
+    }
   }
 }
